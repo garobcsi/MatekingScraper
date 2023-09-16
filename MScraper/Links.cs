@@ -27,14 +27,5 @@ public class Links
                                 "u" +
                                 "/";
 
-    public static string My_courses = "m" +
-                                      "y" +
-                                      "-" +
-                                      "c" +
-                                      "o" +
-                                      "u" +
-                                      "r" +
-                                      "s" +
-                                      "e" +
-                                      "s";
+    public static string My_courses = "my_courses";
 }
