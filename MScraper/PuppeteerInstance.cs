@@ -2,20 +2,21 @@ namespace MScraper;
 using PuppeteerSharp;
 
 public class PuppeteerInstance {
-
-    public static BrowserFetcher browserFetcher;
-
-    private int Width = 1920;
-    private int Height = 1080;
-    private bool Headless = false;
     
-    public async void Init()
+    private bool Headless = false;
+    private int Width = 500;
+    private int Height = 500;
+
+    public static IBrowser browser;
+    public static IPage page;
+    
+    public async Task Init()
     {
-        browserFetcher = new BrowserFetcher();
+        BrowserFetcher browserFetcher = new BrowserFetcher();
         await browserFetcher.DownloadAsync();
-        await using var browser = await Puppeteer.LaunchAsync(
+        browser = await Puppeteer.LaunchAsync(
             new LaunchOptions { Headless = false });
-        await using var page = await browser.NewPageAsync();
+        page = await browser.NewPageAsync();
         await page.SetViewportAsync(new ViewPortOptions
         {
             Width = this.Width,
