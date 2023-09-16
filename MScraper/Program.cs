@@ -1,6 +1,6 @@
 ﻿using MScraper;
-using PuppeteerSharp;
 
-new PuppeteerInstance().Init();
+await new PuppeteerInstance().Init();
+await PuppeteerHelper.Login();
 
 Console.ReadKey();
