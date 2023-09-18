@@ -4,11 +4,13 @@ using PuppeteerSharp;
 public class PuppeteerInstance {
     
     private bool Headless = false;
-    private int Width = 500;
-    private int Height = 500;
-
-    public static IBrowser browser;
-    public static IPage page;
+    // private int Width = 1920;
+    // private int Height = 1080;
+    private int Width = 900;
+    private int Height = 900;
+    
+    public static IBrowser browser { get; private set; }
+    public static IPage page{ get; private set; }
     
     public async Task Init()
     {
