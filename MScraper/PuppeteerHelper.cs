@@ -8,6 +8,12 @@ public class PuppeteerHelper
     {
         DotEnv.Load();
         var envVars = DotEnv.Read();
+        if (envVars["name"] == string.Empty || envVars["name"] == null ||
+            envVars["password"] == string.Empty || envVars["password"] == null)
+        {
+            ColorPrintHelper.WriteLine("Name Or Password is empty.",ConsoleColor.Red);
+            ExitHelper.Exit();
+        }
         
         await page.WaitForSelectorAsync("#mathsplain-login-pane-opener");
         var user = await page.QuerySelectorAsync("#mathsplain-login-pane-opener");
