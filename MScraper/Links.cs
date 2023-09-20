@@ -27,5 +27,5 @@ public class Links
                                 "u" +
                                 "/";
 
-    public static string My_courses = "my_courses";
+    public static string MyCourses = "my-courses";
 }

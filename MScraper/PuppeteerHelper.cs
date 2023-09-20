@@ -1,3 +1,7 @@
+using System.Drawing;
+using MScraper.Model;
+using PuppeteerSharp;
+
 namespace MScraper;
 
 using dotenv.net;
@@ -35,5 +39,40 @@ public class PuppeteerHelper
             ColorPrintHelper.WriteLine("Login Error !",ConsoleColor.Red);
             ExitHelper.Exit();
         }
+    }
+
+    public static async Task<List<MyCourse>> GetMyCourses()
+    {
+        await page.GoToAsync(Links.Base+Links.MyCourses);
+        
+        List<MyCourse> list = new List<MyCourse>();
+        
+        var Course = await page.QuerySelectorAsync("#mathsplain-mycourses-isotope-container>div.purchased");
+        IElementHandle[] Courses = await Course.QuerySelectorAllAsync("div>div.isotope-link>a");
+        IElementHandle[] Courses_Color = await Course.QuerySelectorAllAsync("div.isotope-element");
+
+        if (Courses.Length == 0)
+        {
+            ColorPrintHelper.WriteLine("You did not buy any Courses !",ConsoleColor.Red);
+            ExitHelper.Exit();
+        }
+
+        for (int i = 0; i < Courses.Length; i++)
+        {
+            //TODO: color
+            var text = await Courses[i].GetPropertyAsync("textContent");
+            var link = await Courses[i].GetPropertyAsync("href");
+            var color = await Courses_Color[i].EvaluateFunctionAsync<string>(@"(element) => {
+            const computedStyle = getComputedStyle(element);
+            return computedStyle.backgroundColor;
+            }");
+            color = color.Remove(0, 4);
+            color = color.Remove(color.Length-1,1);
+            int[] colors = color.Split(",").Select(int.Parse).ToArray();
+            list.Add(new MyCourse(await text.JsonValueAsync<string>(),await link.JsonValueAsync<string>(),Color.FromArgb(1,colors[0],colors[1],colors[2])));
+            //TODO: output with color, determine if white background is needed or not 
+        }
+        
+        return list;
     }
 }
