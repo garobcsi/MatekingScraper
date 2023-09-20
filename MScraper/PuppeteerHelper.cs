@@ -75,4 +75,14 @@ public class PuppeteerHelper
         
         return list;
     }
+    
+    public static async Task ListMyCourses(List<MyCourse> data)
+    {
+        Console.WriteLine("\nMy Courses:");
+        for (int i = 0; i < data.Count; i++)
+        {
+            ColorPrintHelper.WriteLine($"  {i+1}) {data[i].Name}",ColorHelper.FindClosestConsoleColor(data[i].Color));
+        }
+        
+    }
 }
