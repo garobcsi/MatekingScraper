@@ -76,7 +76,7 @@ public class PuppeteerHelper
     
     public static async Task BrowserExit()
     {
-        browser.CloseAsync();
-        }
-        
+        await browser.CloseAsync();
+    }
+    
 }
