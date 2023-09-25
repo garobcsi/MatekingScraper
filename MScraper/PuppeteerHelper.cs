@@ -59,7 +59,6 @@ public class PuppeteerHelper
 
         for (int i = 0; i < Courses.Length; i++)
         {
-            //TODO: color
             var text = await Courses[i].GetPropertyAsync("textContent");
             var link = await Courses[i].GetPropertyAsync("href");
             var color = await Courses_Color[i].EvaluateFunctionAsync<string>(@"(element) => {
@@ -70,19 +69,14 @@ public class PuppeteerHelper
             color = color.Remove(color.Length-1,1);
             int[] colors = color.Split(",").Select(int.Parse).ToArray();
             list.Add(new MyCourse(await text.JsonValueAsync<string>(),await link.JsonValueAsync<string>(),Color.FromArgb(1,colors[0],colors[1],colors[2])));
-            //TODO: output with color, determine if white background is needed or not 
         }
         
         return list;
     }
     
-    public static async Task ListMyCourses(List<MyCourse> data)
+    public static async Task BrowserExit()
     {
-        Console.WriteLine("\nMy Courses:");
-        for (int i = 0; i < data.Count; i++)
-        {
-            ColorPrintHelper.WriteLine($"  {i+1}) {data[i].Name}",ColorHelper.FindClosestConsoleColor(data[i].Color));
+        browser.CloseAsync();
         }
         
-    }
 }

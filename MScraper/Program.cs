@@ -1,4 +1,4 @@
-﻿using MScraper;
+using MScraper;
 using MScraper.Model;
 
 if (!File.Exists(".env"))
@@ -9,6 +9,6 @@ if (!File.Exists(".env"))
 await new PuppeteerInstance().Init();
 await PuppeteerHelper.Login();
 List<MyCourse> MyCourses = await PuppeteerHelper.GetMyCourses();
-await PuppeteerHelper.ListMyCourses(MyCourses);
+// ProgramHelper.ScraperChooseOptions(MyCourses);
 
-Console.ReadKey();
+await PuppeteerHelper.BrowserExit();
