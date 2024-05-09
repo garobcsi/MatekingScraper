@@ -2,6 +2,7 @@ using System.Drawing;
 
 namespace MScraper.Model;
 
+//!! TODO:: REFACTOR THIS FILE AND RENAME !!//
 public class MyCourse
 {
     public string Name { get; set; }

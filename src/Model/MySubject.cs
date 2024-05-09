@@ -1,5 +1,6 @@
 namespace MScraper.Model;
 
+//!! TODO:: REFACTOR THIS FILE AND RENAME !!//
 public class MySubject
 {
     public string Name { get; set; }

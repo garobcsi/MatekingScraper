@@ -9,6 +9,5 @@ if (!File.Exists(".env"))
 await new PuppeteerInstance().Init();
 await PuppeteerHelper.Login();
 List<MyCourse> MyCourses = await PuppeteerHelper.GetMyCourses();
-// ProgramHelper.ScraperChooseOptions(MyCourses);
 
 await PuppeteerHelper.BrowserExit();
