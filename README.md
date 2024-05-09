@@ -1,4 +1,4 @@
-# MScraper ( Website and Video Scraper )
+# Math Scraper
 
 ## Disclaimer
 
