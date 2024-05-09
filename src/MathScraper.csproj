@@ -9,7 +9,9 @@
 
     <ItemGroup>
       <PackageReference Include="dotenv.net" Version="3.1.2" />
+      <PackageReference Include="FFMpegCore" Version="5.1.0" />
       <PackageReference Include="PuppeteerSharp" Version="11.0.5" />
+      <PackageReference Include="Terminal.Gui" Version="2.0.0-pre.949" />
     </ItemGroup>
 
     <ItemGroup>
