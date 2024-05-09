@@ -1,11 +1,10 @@
 using System.Drawing;
-using MScraper.Model;
-using PuppeteerSharp;
-
-namespace MScraper;
-
 using dotenv.net;
+using MathScraper.Model;
+using PuppeteerSharp;
 using static PuppeteerInstance;
+
+namespace MathScraper;
 
 //!! TODO:: REFACTOR THIS FILE !!//
 public class PuppeteerHelper
