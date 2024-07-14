@@ -22,19 +22,10 @@ public class BrowserInstance
     })();
     
     public IBrowser? Browser { get; private set; } = null;
-    public IPage? Page { get; private set; } = null; 
-    
     public static async Task<BrowserInstance> Init()
     {
         BrowserInstance bwi = new BrowserInstance();
         bwi.Browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = Headless });
-        bwi.Page = await bwi.Browser.NewPageAsync();
-        await bwi.Page.SetViewportAsync(new ViewPortOptions
-        {
-            Width = Width,
-            Height = Height
-        });
-        await bwi.Page.GoToAsync(Links.Base);
         return bwi;
     }
     
