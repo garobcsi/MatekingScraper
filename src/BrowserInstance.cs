@@ -32,6 +32,5 @@ public class BrowserInstance
     ~BrowserInstance()
     {
         Browser = null;
-        Page = null;
     }
 }
