@@ -7,8 +7,6 @@ namespace MathScraper;
 public class BrowserInstance
 {
     private BrowserInstance() {}
-    private const int Width = 600;
-    private const int Height = 600;
     
     private static readonly bool Headless = new Func<bool>(() =>
     {
@@ -21,16 +19,13 @@ public class BrowserInstance
         return true;
     })();
     
-    public IBrowser? Browser { get; private set; } = null;
+    public IBrowser Browser { get; private set; }
     public static async Task<BrowserInstance> Init()
     {
-        BrowserInstance bwi = new BrowserInstance();
-        bwi.Browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = Headless });
+        BrowserInstance bwi = new BrowserInstance
+        {
+            Browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = Headless })
+        };
         return bwi;
-    }
-    
-    ~BrowserInstance()
-    {
-        Browser = null;
     }
 }
