@@ -4,26 +4,29 @@ namespace MathScraper;
 
 public class AsyncJobQueue
 {
-    private readonly ConcurrentDictionary<Guid, (Func<Guid, CancellationToken, Task> job, Task task, CancellationTokenSource cts)> _jobs = new();
+    private readonly ConcurrentDictionary<int, (Func<int, CancellationToken, Task> job, Task task, CancellationTokenSource cts)> _jobs = new();
     private SemaphoreSlim _semaphore = null!;
     private bool _concurrencyLimitEnabled;
     private int _maxConcurrentJobs;
+    private int _currentJobId;
 
     public AsyncJobQueue(bool concurrencyLimitEnabled = false, int maxConcurrentJobs = 10)
     {
         _concurrencyLimitEnabled = concurrencyLimitEnabled;
         _maxConcurrentJobs = maxConcurrentJobs;
+        _currentJobId = 0;
+
         if (_concurrencyLimitEnabled)
         {
             _semaphore = new SemaphoreSlim(_maxConcurrentJobs, _maxConcurrentJobs);
         }
     }
 
-    public Guid AddJob(Func<Guid, CancellationToken, Task> job)
+    public int AddJob(Func<int, CancellationToken, Task> job)
     {
-        Guid jobId = Guid.NewGuid();
+        int jobId = Interlocked.Increment(ref _currentJobId);
         CancellationTokenSource cts = new();
-        
+
         var task = Task.Run(async () =>
         {
             if (_concurrencyLimitEnabled) await _semaphore.WaitAsync(cts.Token);
@@ -42,7 +45,7 @@ public class AsyncJobQueue
         return jobId;
     }
 
-    private async Task ProcessJob(Guid jobId, Func<Guid, CancellationToken, Task> job, CancellationToken token)
+    private async Task ProcessJob(int jobId, Func<int, CancellationToken, Task> job, CancellationToken token)
     {
         try
         {
@@ -62,14 +65,14 @@ public class AsyncJobQueue
         }
     }
 
-    private void RemoveJob(Guid jobId)
+    private void RemoveJob(int jobId)
     {
         if (!_jobs.TryRemove(jobId, out var jobEntry)) return;
         jobEntry.cts.Cancel();
         jobEntry.cts.Dispose();
     }
 
-    public void CancelJob(Guid jobId)
+    public void CancelJob(int jobId)
     {
         if (_jobs.TryGetValue(jobId, out var jobEntry))
         {
