@@ -116,4 +116,23 @@ public class PageInstance
         
         return new List<Subject>();
     }
+
+    public async Task<Tuple<int,List<Subject>>> GetMyCourses()
+    {
+        await Page.GoToAsync(Links.Base + Links.MyCourses);
+        await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div > div");
+        if (await Page.QuerySelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div > div > div.panel-pane.pane-custom.pane-1.message > div > div > p") != null) return new Tuple<int, List<Subject>>(1,new List<Subject>()); //you are not logged in
+        
+        List<Subject> subjects = new();
+        var selections = await Page.QuerySelectorAllAsync("#mathsplain-mycourses-isotope-container>div.purchased > div > div.isotope-link > a");
+        foreach (var s in selections)
+        {
+            var text = await s.GetPropertyAsync("textContent");
+            var link = await s.GetPropertyAsync("href");
+            
+            subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+        }
+        
+        return new Tuple<int, List<Subject>>(0,subjects); 
+    }
 }
