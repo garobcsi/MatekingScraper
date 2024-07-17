@@ -69,7 +69,19 @@ public class PageInstance
             }
             case SubjectType.HighSchool :
             {
-                
+                List<Subject> subjects = new();
+                var selections = await Page.QuerySelectorAllAsync(
+                    "#mini-panel-mathsplain_header_1 > div.panel-panel.panel-col-first > div > div.panel-pane.pane-views.pane-left-menu.highschool-menu > div > div > div > div > ul > li");
+                foreach (var i in selections)
+                {
+                    var selection = await i.QuerySelectorAsync("li > div > a");
+                    var link = await selection.GetPropertyAsync("href");
+                    var text = await selection.GetPropertyAsync("textContent");
+                    
+                    subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+                }
+
+                return subjects;
                 break;
             }
             case SubjectType.University :
