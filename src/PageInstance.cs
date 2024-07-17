@@ -23,6 +23,8 @@ public class PageInstance
     }
     public async Task<int> Login(string username,string password)
     {
+        if (username == String.Empty || password == String.Empty) return 1;
+        
         await Page.GoToAsync(Links.Base);
         await Page.WaitForSelectorAsync("#mini-panel-mathsplain_header_1 > div.panel-panel.panel-col-last > div > div.panel-pane.pane-custom");
         if (await Page.QuerySelectorAsync("#mathsplain-user-menu-opener") != null) return 2; // User already logged in
