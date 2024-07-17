@@ -86,7 +86,27 @@ public class PageInstance
             }
             case SubjectType.University :
             {
-                
+                await Page.GoToAsync(Links.Base+Links.AllUniversitySubjects);
+                await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div");
+
+                List<Subject> subjects = new();
+                var selections = await Page.QuerySelectorAllAsync(
+                    "body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div div.university");
+                foreach (var s in selections)
+                {
+                    var hyperlinks = await s.QuerySelectorAllAsync("div > div.university-terms > div > a");
+                    foreach (var h in hyperlinks)
+                    {
+                        var text = await h.GetPropertyAsync("textContent");
+                        var link = await h.GetPropertyAsync("href");
+                        
+                        subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+                    }
+                }
+
+                subjects = subjects.DistinctBy(subject => subject.Link).OrderBy(subject => subject.Name).ToList();
+
+                return subjects;
                 break;
             }
         }
