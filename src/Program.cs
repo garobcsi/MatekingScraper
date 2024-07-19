@@ -108,7 +108,10 @@ Subject? selectedSubject = null;
 }
 
 { //scrape video's data
-    
+    foreach (var s in selectedSubject.SubSubjects)
+    {
+        s.Videos = await pai.GetVideos(s);
+    }
 }
 
 { //scrape videos

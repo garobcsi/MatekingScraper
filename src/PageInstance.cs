@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using MathScraper.Model;
 using PuppeteerSharp;
 
@@ -153,5 +154,25 @@ public class PageInstance
             subSubjects.Add(new SubSubject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
         }
         return subSubjects;
+    }
+
+    public async Task<List<Video>> GetVideos(SubSubject subSubject)
+    {
+        uint number = 0;
+        
+        List<Video> videos = new();
+        await Page.GoToAsync(subSubject.Link);
+        await Page.WaitForSelectorAsync("#isotope-container");
+        var selections = await Page.QuerySelectorAllAsync("#isotope-container > div.isotope-element.video");
+        foreach (var s in selections)
+        {
+            var text = await (await s.QuerySelectorAsync("a > div.video-box-content")).GetPropertyAsync("textContent");
+            var link = await (await s.QuerySelectorAsync("a")).GetPropertyAsync("href");
+            bool accessible = await s.QuerySelectorAsync("div.video-box-header-icons > div.video-free") != null;
+            
+            videos.Add(new Video() {Name = Regex.Replace(text.ToString(), @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' '),Link = Regex.Replace(link.ToString(), @"\t|\n|\r|JSHandle:", ""),Number = ++number,Accessible = accessible});
+        }
+
+        return videos;
     }
 }
