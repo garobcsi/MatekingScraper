@@ -137,4 +137,21 @@ public class PageInstance
         
         return new Tuple<int, List<Subject>>(0,subjects); 
     }
+
+    public async Task<List<SubSubject>> GetSubSubjects(Subject subject)
+    {
+        List<SubSubject> subSubjects = new();
+        await Page.GoToAsync(subject.Link);
+        await Page.WaitForSelectorAsync("#panel-page-mathsplain-video > div.panel-panel.panel-col-first > div > div.panel-pane.pane-block.pane-menu-block-1 > div > div > ul");
+        var selections = await Page.QuerySelectorAllAsync(
+            "#panel-page-mathsplain-video > div.panel-panel.panel-col-first > div > div.panel-pane.pane-block.pane-menu-block-1 > div > div > ul > li a");
+        foreach (var s in selections)
+        {
+            var text = await s.GetPropertyAsync("textContent");
+            var link = await s.GetPropertyAsync("href");
+            
+            subSubjects.Add(new SubSubject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+        }
+        return subSubjects;
+    }
 }
