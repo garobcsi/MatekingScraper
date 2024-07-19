@@ -108,10 +108,17 @@ Subject? selectedSubject = null;
 }
 
 { //scrape video's data
+    AsyncJobQueue jobQueue = new AsyncJobQueue(true, 5);
     foreach (var s in selectedSubject.SubSubjects)
     {
-        s.Videos = await pai.GetVideos(s);
+        jobQueue.AddJob(async (id,token) =>
+        {
+            PageInstance p = await PageInstance.Init(bwi);
+            s.Videos = await p.GetVideos(s);
+            await p.Page.CloseAsync();
+        });
     }
+    await jobQueue.WaitForAllJobsAsync();
 }
 
 { //scrape videos
