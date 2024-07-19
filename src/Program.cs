@@ -102,6 +102,17 @@ Subject? selectedSubject = null;
         PrintColor.WriteLine("Invalid Input !",ConsoleColor.Red);
     }
 }
+
+{ //scrape subject's data
+    selectedSubject.SubSubjects = await pai.GetSubSubjects(selectedSubject);
+}
+
+{ //scrape video's data
+    
+}
+
+{ //scrape videos
+    
 }
 
 await pai.Page.CloseAsync();
