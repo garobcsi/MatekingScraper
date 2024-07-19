@@ -36,6 +36,44 @@ var env = DotEnv.Read();
         PrintColor.WriteLine("warn: continuing without account (scraping functions may be limited)",ConsoleColor.Yellow);
     }
 }
+
+SubjectType? selectedType = null;
+{ // User selects subject type
+    Console.WriteLine("\nSelect Subject Type\n");
+    Console.WriteLine("1. Preschool");
+    Console.WriteLine("2. HighSchool");
+    Console.WriteLine("3. University");
+    
+    while (true)
+    {
+        Console.ResetColor();
+        Console.Write("Select: ");
+        var select = Console.ReadLine();
+        if (int.TryParse(select, out int s))
+        {
+            switch (s)
+            {
+                case 1:
+                {
+                    selectedType = SubjectType.Preschool;
+                    break;
+                }
+                case 2:
+                {
+                    selectedType = SubjectType.HighSchool;
+                    break;
+                }
+                case 3:
+                {
+                    selectedType = SubjectType.University;
+                    break; 
+                }
+            }
+        } 
+        if (selectedType != null) break;
+        PrintColor.WriteLine("Invalid Input !",ConsoleColor.Red);
+    }
+}
 }
 
 await pai.Page.CloseAsync();
