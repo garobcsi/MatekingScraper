@@ -74,6 +74,34 @@ SubjectType? selectedType = null;
         PrintColor.WriteLine("Invalid Input !",ConsoleColor.Red);
     }
 }
+
+List<Subject> boughtCourses = (await pai.GetMyCourses()).Item2; //load users bought courses
+
+List<Subject> subjects;
+Subject? selectedSubject = null;
+{ // Select subject
+    subjects = await pai.GetSubjects((SubjectType)selectedType);
+    Console.WriteLine("\nSelect Subject\n");
+    
+    var bought = boughtCourses.Select(subject => subject.Link).ToHashSet();
+    for (int i = 0; i < subjects.Count; i++)
+    {
+        PrintColor.WriteLine($"{i+1}: {subjects[i].Name}",bought.Contains(subjects[i].Link) ? ConsoleColor.DarkCyan: null);
+    }
+
+    while (true)
+    {
+        Console.ResetColor();
+        Console.Write("Select: ");
+        var select = Console.ReadLine();
+        if (int.TryParse(select, out int s) && 1 <= s && subjects.Count >= s)
+        {
+            selectedSubject = subjects[s - 1];
+        }
+        if (selectedSubject != null) break;
+        PrintColor.WriteLine("Invalid Input !",ConsoleColor.Red);
+    }
+}
 }
 
 await pai.Page.CloseAsync();
