@@ -149,9 +149,8 @@ Subject? selectedSubject = null;
                 {
                     PageInstance p = await PageInstance.Init(bwi);
 
-                    string path = $"./data/{selectedSubject.Name}/{s.Number}-{s.Name}";
                     
-                    await p.ScrapeVideo(v,path);
+                    await p.ScrapeVideo(selectedSubject,s,v);
                     
                     await p.Page.CloseAsync();
                 });

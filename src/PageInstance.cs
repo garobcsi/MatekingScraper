@@ -24,7 +24,12 @@ public class PageInstance
     }
 
     private string StringFormat(string? str) => Regex.Replace(str??"", @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' ');
-    
+    private string CleanPath(string? str)
+    {
+        string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+        Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+        return r.Replace(str ?? "", "");
+    }
     public async Task<int> Login(string username,string password)
     {
         if (username == String.Empty || password == String.Empty) return 1;
@@ -205,13 +210,15 @@ public class PageInstance
         return videos;
     }
 
-    public async Task<int> ScrapeVideo(Video video,string folderPath)
+    public async Task<int> ScrapeVideo(Subject subject,SubSubject subSubject,Video video)
     {
         if (!video.Accessible) return 1; // video is not scrapeable
 
-        string videoPath = folderPath+$"/{video.Number}-{video.Name}.metadata";
+        string path = $"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}";
+        string videoPath = path + $"/{video.Number}-{CleanPath(video.Name)}.metadata";
+
         DirectoryInfo folder = Directory.CreateDirectory(videoPath);
-        
+
         return 0; // scraped successfully
     }
 }
