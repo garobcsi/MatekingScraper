@@ -22,6 +22,9 @@ public class PageInstance
         });
         return pai;
     }
+
+    private string StringFormat(string? str) => Regex.Replace(str??"", @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' ');
+    
     public async Task<int> Login(string username,string password)
     {
         if (username == String.Empty || password == String.Empty) return 1;
@@ -64,7 +67,7 @@ public class PageInstance
                     var text = await selection.GetPropertyAsync("textContent");
                     var link = await selection.GetPropertyAsync("href");
                     
-                    subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+                    subjects.Add(new Subject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString())});
                 }
 
                 return subjects;
@@ -84,7 +87,7 @@ public class PageInstance
                     var text = await selection.GetPropertyAsync("textContent");
                     var link = await selection.GetPropertyAsync("href");
                     
-                    subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+                    subjects.Add(new Subject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString())});
                 }
 
                 return subjects;
@@ -105,8 +108,11 @@ public class PageInstance
                     {
                         var text = await h.GetPropertyAsync("textContent");
                         var link = await h.GetPropertyAsync("href");
+
+                        string formatedLink = StringFormat(link.ToString());
+                        if (formatedLink == Links.Base+Links.Thematics) continue;
                         
-                        subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+                        subjects.Add(new Subject() {Name = StringFormat(text.ToString()),Link = formatedLink});
                     }
                 }
 
@@ -133,7 +139,7 @@ public class PageInstance
             var text = await s.GetPropertyAsync("textContent");
             var link = await s.GetPropertyAsync("href");
             
-            subjects.Add(new Subject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+            subjects.Add(new Subject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString())});
         }
         
         return new Tuple<int, List<Subject>>(0,subjects); 
@@ -151,7 +157,7 @@ public class PageInstance
             var text = await s.GetPropertyAsync("textContent");
             var link = await s.GetPropertyAsync("href");
             
-            subSubjects.Add(new SubSubject() {Name = text.ToString().Remove(0,9),Link = link.ToString().Remove(0,9)});
+            subSubjects.Add(new SubSubject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString())});
         }
         return subSubjects;
     }
@@ -170,7 +176,7 @@ public class PageInstance
             var link = await (await s.QuerySelectorAsync("a")).GetPropertyAsync("href");
             bool accessible = await s.QuerySelectorAsync("div.video-box-header-icons > div.video-free") != null;
             
-            videos.Add(new Video() {Name = Regex.Replace(text.ToString(), @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' '),Link = Regex.Replace(link.ToString(), @"\t|\n|\r|JSHandle:", ""),Number = ++number,Accessible = accessible});
+            videos.Add(new Video() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString()),Number = ++number,Accessible = accessible});
         }
 
         return videos;
