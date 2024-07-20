@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.RegularExpressions;
 using MathScraper.Model;
 using PuppeteerSharp;
@@ -219,6 +220,28 @@ public class PageInstance
 
         DirectoryInfo folder = Directory.CreateDirectory(videoPath);
 
+        await Page.GoToAsync(video.Link);
+        await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div > div > div > div.panel-pane.pane-entity-view.pane-node > div > div > div > div > div.field.field-name-field-swiffy-entity.field-type-entityreference.field-label-hidden");
+
+        {//dowload audio
+            string audioLink = await Page.EvaluateExpressionAsync<string>(@"hangforras");
+            
+            if (audioLink != "")
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    using (HttpResponseMessage response = await httpClient.GetAsync(audioLink))
+                    {
+                        response.EnsureSuccessStatusCode();
+
+                        using (Stream contentStream = await response.Content.ReadAsStreamAsync(),
+                               fileStream = new FileStream(videoPath+"/audio.mp3", FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                        {
+                            await contentStream.CopyToAsync(fileStream);
+                        }
+                    }
+                }
+        }
+        
         return 0; // scraped successfully
     }
 }

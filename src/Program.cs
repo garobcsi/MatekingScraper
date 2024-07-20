@@ -147,15 +147,18 @@ Subject? selectedSubject = null;
                 if (!v.Accessible) continue;
                 jobQueue.AddJob(async (id, token) =>
                 {
+                    Console.WriteLine($"info: Job {id} started");
                     PageInstance p = await PageInstance.Init(bwi);
-
                     
                     await p.ScrapeVideo(selectedSubject,s,v);
                     
                     await p.Page.CloseAsync();
+                    Console.WriteLine($"info: Job {id} finished");
                 });
             }
     }
+
+    PrintColor.WriteLine($"info: {jobQueue.RunningJobsCount} jobs started",ConsoleColor.Green);
     
     await jobQueue.WaitForAllJobsAsync();
     PrintColor.WriteLine("info: Videos scraped successfully",ConsoleColor.Green);
