@@ -3,6 +3,9 @@ using MathScraper;
 using MathScraper.Model;
 
 BrowserInstance bwi = await BrowserInstance.Init();
+if (bwi.Browser.IsConnected) PrintColor.WriteLine("info: browser instance started successfully",ConsoleColor.Green);
+else PrintColor.WriteLine("error: browser instance failed to start",ConsoleColor.Red);
+
 PageInstance pai = await PageInstance.Init(bwi);
 var env = DotEnv.Read();
 
@@ -75,12 +78,20 @@ SubjectType? selectedType = null;
     }
 }
 
-List<Subject> boughtCourses = (await pai.GetMyCourses()).Item2; //load users bought courses
+List<Subject> boughtCourses;
+{
+    var tmp = await pai.GetMyCourses(); //load users bought courses
+    boughtCourses = tmp.Item2;
+    if (tmp.Item1 == 0) PrintColor.WriteLine("info: Bought Subjects loaded successfully",ConsoleColor.Green);
+    if (tmp.Item1 == 1) PrintColor.WriteLine("warn: Bought Subjects could not be loaded (user is not logged in)",ConsoleColor.Yellow);
+}
 
 List<Subject> subjects;
 Subject? selectedSubject = null;
 { // Select subject
     subjects = await pai.GetSubjects((SubjectType)selectedType);
+    PrintColor.WriteLine("info: Subjects loaded successfully",ConsoleColor.Green);
+    
     Console.WriteLine("\nSelect Subject\n");
     
     var bought = boughtCourses.Select(subject => subject.Link).ToHashSet();
@@ -105,6 +116,7 @@ Subject? selectedSubject = null;
 
 { //scrape subject's data
     selectedSubject.SubSubjects = await pai.GetSubSubjects(selectedSubject);
+    PrintColor.WriteLine("info: Sub Subjects loaded successfully",ConsoleColor.Green);
 }
 
 { //scrape video's data
@@ -119,10 +131,11 @@ Subject? selectedSubject = null;
         });
     }
     await jobQueue.WaitForAllJobsAsync();
+    PrintColor.WriteLine("info: Videos Data loaded successfully",ConsoleColor.Green);
 }
 
 { //scrape videos
-    
+    PrintColor.WriteLine("info: Video scraping started",ConsoleColor.Green);
 }
 
 await pai.Page.CloseAsync();
