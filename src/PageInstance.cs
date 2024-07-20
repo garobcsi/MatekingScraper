@@ -169,6 +169,8 @@ public class PageInstance
     public async Task<List<SubSubject>> GetSubSubjects(Subject subject)
     {
         List<SubSubject> subSubjects = new();
+        uint number=0;
+        
         await Page.GoToAsync(subject.Link);
         await Page.WaitForSelectorAsync("#panel-page-mathsplain-video > div.panel-panel.panel-col-first > div > div.panel-pane.pane-block.pane-menu-block-1 > div > div > ul");
         var selections = await Page.QuerySelectorAllAsync(
@@ -178,16 +180,16 @@ public class PageInstance
             var text = await s.GetPropertyAsync("textContent");
             var link = await s.GetPropertyAsync("href");
             
-            subSubjects.Add(new SubSubject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString())});
+            subSubjects.Add(new SubSubject() {Name = StringFormat(text.ToString()),Link = StringFormat(link.ToString()),Number = ++number});
         }
         return subSubjects;
     }
 
     public async Task<List<Video>> GetVideos(SubSubject subSubject)
     {
+        List<Video> videos = new();
         uint number = 0;
         
-        List<Video> videos = new();
         await Page.GoToAsync(subSubject.Link);
         await Page.WaitForSelectorAsync("#isotope-container");
         var selections = await Page.QuerySelectorAllAsync("#isotope-container > div.isotope-element.video");
