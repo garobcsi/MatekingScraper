@@ -204,4 +204,14 @@ public class PageInstance
 
         return videos;
     }
+
+    public async Task<int> ScrapeVideo(Video video,string folderPath)
+    {
+        if (!video.Accessible) return 1; // video is not scrapeable
+
+        string videoPath = folderPath+$"/{video.Number}-{video.Name}.metadata";
+        DirectoryInfo folder = Directory.CreateDirectory(videoPath);
+        
+        return 0; // scraped successfully
+    }
 }

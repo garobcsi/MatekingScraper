@@ -136,6 +136,30 @@ Subject? selectedSubject = null;
 
 { //scrape videos
     PrintColor.WriteLine("info: Video scraping started",ConsoleColor.Green);
+    
+    AsyncJobQueue jobQueue = new AsyncJobQueue(true, 5);
+    
+    foreach (var s in selectedSubject.SubSubjects)
+    {
+        if (s.Videos != null)
+            foreach (var v in s.Videos)
+            {
+                if (!v.Accessible) continue;
+                jobQueue.AddJob(async (id, token) =>
+                {
+                    PageInstance p = await PageInstance.Init(bwi);
+
+                    string path = $"./data/{selectedSubject.Name}/{s.Number}-{s.Name}";
+                    
+                    await p.ScrapeVideo(v,path);
+                    
+                    await p.Page.CloseAsync();
+                });
+            }
+    }
+    
+    await jobQueue.WaitForAllJobsAsync();
+    PrintColor.WriteLine("info: Videos scraped successfully",ConsoleColor.Green);
 }
 
 await pai.Page.CloseAsync();
