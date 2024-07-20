@@ -95,24 +95,45 @@ public class PageInstance
             }
             case SubjectType.University :
             {
-                await Page.GoToAsync(Links.Base+Links.AllUniversitySubjects);
-                await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div");
-
                 List<Subject> subjects = new();
-                var selections = await Page.QuerySelectorAllAsync(
-                    "body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div div.university");
-                foreach (var s in selections)
-                {
-                    var hyperlinks = await s.QuerySelectorAllAsync("div > div.university-terms > div > a");
-                    foreach (var h in hyperlinks)
-                    {
-                        var text = await h.GetPropertyAsync("textContent");
-                        var link = await h.GetPropertyAsync("href");
+                { // First website
+                    await Page.GoToAsync(Links.Base + Links.AllUniversitySubjects);
+                    await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div");
 
-                        string formatedLink = StringFormat(link.ToString());
-                        if (formatedLink == Links.Base+Links.Thematics) continue;
-                        
-                        subjects.Add(new Subject() {Name = StringFormat(text.ToString()),Link = formatedLink});
+                    var selections = await Page.QuerySelectorAllAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > article > div > div > div > div > div > div > div div.university");
+                    foreach (var s in selections)
+                    {
+                        var hyperlinks = await s.QuerySelectorAllAsync("div > div.university-terms > div > a");
+                        foreach (var h in hyperlinks)
+                        {
+                            var text = await h.GetPropertyAsync("textContent");
+                            var link = await h.GetPropertyAsync("href");
+
+                            string formatedLink = StringFormat(link.ToString());
+                            if (formatedLink == Links.Base + Links.Thematics) continue;
+
+                            subjects.Add(new Subject() { Name = StringFormat(text.ToString()), Link = formatedLink });
+                        }
+                    }
+                }
+                { // Second website
+                    await Page.GoToAsync(Links.Base+Links.Thematics);
+                    await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div.view-content");
+
+                    var selections = await Page.QuerySelectorAllAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div.view-content div");
+
+                    foreach (var s in selections)
+                    {
+                        var hyperlinks = await s.QuerySelectorAllAsync("tbody > tr > td.views-field-field-related-categories > a");
+
+                        foreach (var h in hyperlinks)
+                        {
+                            var text = await h.GetPropertyAsync("textContent");
+                            var link = await h.GetPropertyAsync("href");
+                            
+                            subjects.Add(new Subject() { Name = StringFormat(text.ToString()), Link = StringFormat(link.ToString()) });
+
+                        }
                     }
                 }
 
