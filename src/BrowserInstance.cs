@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using dotenv.net;
 using PuppeteerSharp;
 
@@ -22,6 +21,9 @@ public class BrowserInstance
     public IBrowser Browser { get; private set; }
     public static async Task<BrowserInstance> Init()
     {
+        using var browserFetcher = new BrowserFetcher();
+        await browserFetcher.DownloadAsync();
+
         BrowserInstance bwi = new BrowserInstance
         {
             Browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = Headless })
