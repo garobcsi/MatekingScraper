@@ -27,7 +27,7 @@ public class PageInstance
     private string StringFormat(string? str) => Regex.Replace(str??"", @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' ');
     private string CleanPath(string? str)
     {
-        string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()+"?");
+        string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()) + "?";
         Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
         return r.Replace(str ?? "", "");
     }
@@ -318,8 +318,9 @@ public class PageInstance
                     .WithCustomArgument("-f concat -safe 0 -r 1"));
 
             string audioPath = Path.GetFullPath(videoPath + "/audio.mp3");
+            bool audioExists = File.Exists(audioPath);
             
-            if (File.Exists(audioPath))
+            if (audioExists)
             {
                 ffmpegArgs = ffmpegArgs.AddFileInput(audioPath);
             }
@@ -331,7 +332,7 @@ public class PageInstance
                         .WithCustomArgument("-pix_fmt yuv420p")
                         .WithCustomArgument("-map 0:v:0");
 
-                    if (File.Exists(audioPath))
+                    if (audioExists)
                     {
                         options.WithCustomArgument("-map 1:a:0")
                             .WithCustomArgument("-c:v copy -c:a aac");
@@ -341,7 +342,7 @@ public class PageInstance
                         options.WithCustomArgument("-c:v copy");
                     }
 
-                    options.WithCustomArgument("-map_metadata 2");
+                    options.WithCustomArgument("-map_metadata "+ (audioExists ? "2" : "1"));
                 });
             await ffmpegProc.ProcessAsynchronously();
         }
