@@ -1,7 +1,7 @@
-using System.Net;
 using System.Text.RegularExpressions;
 using MathScraper.Model;
 using PuppeteerSharp;
+using FFMpegCore;
 
 namespace MathScraper;
 
@@ -286,6 +286,27 @@ public class PageInstance
                 var imageBytes = Convert.FromBase64String(base64);
                 await File.WriteAllBytesAsync(videoPath+$"/{i}.png", imageBytes, cts);
             }
+        }
+
+        {//cut video
+            using (StreamWriter writer = new StreamWriter(videoPath+"/imagelist.txt"))
+            {
+                for (int i = 0; i < audioSlides.Count - 2; i++)
+                {
+                    writer.WriteLine($"file './{i + 1}.png'");
+                    writer.WriteLine($"duration {audioSlides[i + 2] - audioSlides[i+1]}");
+                }
+            }
+
+            await FFMpegArguments
+                .FromFileInput(videoPath+"/imagelist.txt", false, options => options.WithCustomArgument("-f concat -safe 0 -r 1"))
+                .AddFileInput(videoPath+"/audio.mp3")
+                .OutputToFile(path+$"/{video.Number}-{CleanPath(video.Name)}.mp4", true, options => options
+                    .WithVideoCodec("libx264")
+                    .WithCustomArgument("-pix_fmt yuv420p")
+                    .WithCustomArgument("-map 0:v:0 -map 1:a:0")
+                    .WithCustomArgument("-c:v copy -c:a aac"))
+                .ProcessAsynchronously();
         }
         return 0; // scraped successfully
     }
