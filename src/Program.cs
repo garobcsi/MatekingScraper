@@ -161,7 +161,8 @@ Subject? selectedSubject = null;
     PrintColor.WriteLine($"info: {jobQueue.RunningJobsCount} jobs started",ConsoleColor.Green);
     
     await jobQueue.WaitForAllJobsAsync();
-    PrintColor.WriteLine("info: Videos scraped successfully",ConsoleColor.Green);
+    if (jobQueue.FailedJobsCount == 0) PrintColor.WriteLine("info: Videos scraped successfully",ConsoleColor.Green);
+    else PrintColor.WriteLine("error: Videos scraped unsuccessfully", ConsoleColor.Red);
 }
 
 await pai.Page.CloseAsync();
