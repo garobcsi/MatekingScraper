@@ -150,7 +150,7 @@ Subject? selectedSubject = null;
                     Console.WriteLine($"info: Job {id} started");
                     PageInstance p = await PageInstance.Init(bwi);
                     
-                    await p.ScrapeVideo(selectedSubject,s,v);
+                    await p.ScrapeVideo(selectedSubject,s,v,token);
                     
                     await p.Page.CloseAsync();
                     Console.WriteLine($"info: Job {id} finished");

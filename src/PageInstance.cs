@@ -9,8 +9,8 @@ public class PageInstance
 {
     private PageInstance() {}
     
-    private const int Width = 600;
-    private const int Height = 600;
+    private const int Width = 1920;
+    private const int Height = 1080;
     public IPage Page { get; private set; }
     public static async Task<PageInstance> Init(BrowserInstance bwi)
     {
@@ -211,7 +211,7 @@ public class PageInstance
         return videos;
     }
 
-    public async Task<int> ScrapeVideo(Subject subject,SubSubject subSubject,Video video)
+    public async Task<int> ScrapeVideo(Subject subject,SubSubject subSubject,Video video,CancellationToken cts)
     {
         if (!video.Accessible) return 1; // video is not scrapeable
 
@@ -224,7 +224,7 @@ public class PageInstance
         await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div > div > div > div.panel-pane.pane-entity-view.pane-node > div > div > div > div > div.field.field-name-field-swiffy-entity.field-type-entityreference.field-label-hidden");
 
         {//dowload audio
-            string audioLink = await Page.EvaluateExpressionAsync<string>(@"hangforras");
+            string audioLink = await Page.EvaluateExpressionAsync<string>("hangforras");
             
             if (audioLink != "")
                 using (HttpClient httpClient = new HttpClient())
@@ -241,7 +241,50 @@ public class PageInstance
                     }
                 }
         }
+
+        List<uint> chapterSlides = await Page.EvaluateExpressionAsync<List<uint>>("BogyoKulcsDiak");
+        List<double> audioSlides = await Page.EvaluateExpressionAsync<List<double>>("HangKulcsIdok");
+
+        uint slidesCount = chapterSlides.Last();
         
+        {//download pngs
+            string lastPng = await Page.EvaluateExpressionAsync<string>(@"
+                (function() {
+                    var canvas = document.querySelector('canvas');
+                    return canvas.toDataURL('image/png');
+                })();");
+            
+            while (true) // wait for first slide to load
+            {
+                await Page.EvaluateExpressionAsync($"Tekeres(1);");
+                uint currentSlide = await Page.EvaluateExpressionAsync<uint>("AktualisDia");
+                if (currentSlide == 1) break;
+                await Task.Delay(500, cts);
+            }
+            
+            for (int i = 1; i < slidesCount; i++)
+            {
+                string currentPng;
+                await Page.EvaluateExpressionAsync($"Tekeres({i});");
+                while (true)
+                {
+                    uint currentSlide = await Page.EvaluateExpressionAsync<uint>("AktualisDia");
+                    currentPng = await Page.EvaluateExpressionAsync<string>(@"
+                        (function() {
+                            var canvas = document.querySelector('canvas');
+                            return canvas.toDataURL('image/png');
+                        })();");
+                    if (currentSlide == i && lastPng != currentPng)
+                    {
+                        lastPng = currentPng;
+                        break;
+                    }
+                }
+                string base64 = currentPng.Split(',')[1];
+                var imageBytes = Convert.FromBase64String(base64);
+                await File.WriteAllBytesAsync(videoPath+$"/{i}.png", imageBytes, cts);
+            }
+        }
         return 0; // scraped successfully
     }
 }
