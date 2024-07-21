@@ -289,36 +289,68 @@ public class PageInstance
         }
 
         {//cut video
+            string audioPath = Path.GetFullPath(videoPath + "/audio.mp3");
+            bool audioExists = File.Exists(audioPath);
+            
+            uint muteAudioDuration = 5;
+            
             using (StreamWriter writer = new StreamWriter(Path.GetFullPath(videoPath+"/imagelist.txt")))
             {
-                for (int i = 0; i < audioSlides.Count - 2; i++)
+                if (audioExists)
                 {
-                    writer.WriteLine($"file './{i + 1}.png'");
-                    string str = (audioSlides[i + 2] - audioSlides[i + 1]).ToString();
-                    writer.WriteLine($"duration {str.Replace(',', '.')}");
+                    for (int i = 0; i < audioSlides.Count - 2; i++)
+                    {
+                        writer.WriteLine($"file './{i + 1}.png'");
+                        string str = (audioSlides[i + 2] - audioSlides[i + 1]).ToString();
+                        writer.WriteLine($"duration {str.Replace(',', '.')}");
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < slidesCount-1; i++)
+                    {
+                        writer.WriteLine($"file './{i + 1}.png'");
+                        writer.WriteLine($"duration {muteAudioDuration}");
+                    }
+                    writer.WriteLine($"file './{slidesCount-1}.png'");
+                    writer.WriteLine($"duration {muteAudioDuration}");
                 }
             }
-
+            
             using (StreamWriter writer = new StreamWriter(Path.GetFullPath(videoPath+"/metadata.txt")))
             {
                 writer.WriteLine(";FFMETADATA1");
-                for (int i = 0; i < audioSlides.Count - 1; i++)
+                if (audioExists)
                 {
-                    writer.WriteLine($"[CHAPTER]");
-                    writer.WriteLine($"TIMEBASE=1/1000");
-                    writer.WriteLine($"START={(int)(audioSlides[i] * 1000)}"); 
-                    writer.WriteLine($"END={(int)(audioSlides[i+1] * 1000)-1}"); 
-                    writer.WriteLine($"title=Chapter {i + 1}");
-                    writer.WriteLine();
+                    for (int i = 0; i < audioSlides.Count - 1; i++)
+                    {
+                        writer.WriteLine($"[CHAPTER]");
+                        writer.WriteLine($"TIMEBASE=1/1000");
+                        writer.WriteLine($"START={(int)(audioSlides[i] * 1000)}"); 
+                        writer.WriteLine($"END={(int)(audioSlides[i+1] * 1000)-1}"); 
+                        writer.WriteLine($"title=Chapter {i + 1}");
+                        writer.WriteLine();
+                    }
+                }
+                else
+                {
+                    uint counter = 0;
+                    for (int i = 0; i < slidesCount-1; i++)
+                    {
+                        writer.WriteLine($"[CHAPTER]");
+                        writer.WriteLine($"TIMEBASE=1/1000");
+                        writer.WriteLine($"START={(uint)(counter*1000)}");
+                        writer.WriteLine($"END={(uint)(((counter += muteAudioDuration)*1000)-1)}"); 
+                        writer.WriteLine($"title=Chapter {i + 1}");
+                        writer.WriteLine();
+                    }
                 }
             }
 
             var ffmpegArgs = FFMpegArguments
                 .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
                     .WithCustomArgument("-f concat -safe 0 -r 1"));
-
-            string audioPath = Path.GetFullPath(videoPath + "/audio.mp3");
-            bool audioExists = File.Exists(audioPath);
+            
             
             if (audioExists)
             {
@@ -331,17 +363,14 @@ public class PageInstance
                     options.WithVideoCodec("libx264")
                         .WithCustomArgument("-pix_fmt yuv420p")
                         .WithCustomArgument("-map 0:v:0");
-
+            
+                    options.WithCustomArgument("-c:v copy");
                     if (audioExists)
                     {
                         options.WithCustomArgument("-map 1:a:0")
-                            .WithCustomArgument("-c:v copy -c:a aac");
+                            .WithCustomArgument("-c:a aac");
                     }
-                    else
-                    {
-                        options.WithCustomArgument("-c:v copy");
-                    }
-
+            
                     options.WithCustomArgument("-map_metadata "+ (audioExists ? "2" : "1"));
                 });
             await ffmpegProc.ProcessAsynchronously();
