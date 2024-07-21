@@ -215,8 +215,8 @@ public class PageInstance
     {
         if (!video.Accessible) return 1; // video is not scrapeable
 
-        string path = $"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}";
-        string videoPath = path + $"/{video.Number}-{CleanPath(video.Name)}.metadata";
+        string path = Path.GetFullPath($"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}");
+        string videoPath = Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.metadata");
 
         DirectoryInfo folder = Directory.CreateDirectory(videoPath);
 
@@ -234,7 +234,7 @@ public class PageInstance
                         response.EnsureSuccessStatusCode();
 
                         using (Stream contentStream = await response.Content.ReadAsStreamAsync(),
-                               fileStream = new FileStream(videoPath+"/audio.mp3", FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                               fileStream = new FileStream(Path.GetFullPath(videoPath+"/audio.mp3"), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                         {
                             await contentStream.CopyToAsync(fileStream, cts);
                         }
@@ -284,21 +284,22 @@ public class PageInstance
                 }
                 string base64 = currentPng.Split(',')[1];
                 var imageBytes = Convert.FromBase64String(base64);
-                await File.WriteAllBytesAsync(videoPath+$"/{i}.png", imageBytes, cts);
+                await File.WriteAllBytesAsync(Path.GetFullPath(videoPath+$"/{i}.png"), imageBytes, cts);
             }
         }
 
         {//cut video
-            using (StreamWriter writer = new StreamWriter(videoPath+"/imagelist.txt"))
+            using (StreamWriter writer = new StreamWriter(Path.GetFullPath(videoPath+"/imagelist.txt")))
             {
                 for (int i = 0; i < audioSlides.Count - 2; i++)
                 {
                     writer.WriteLine($"file './{i + 1}.png'");
-                    writer.WriteLine($"duration {audioSlides[i + 2] - audioSlides[i+1]}");
+                    string str = (audioSlides[i + 2] - audioSlides[i + 1]).ToString();
+                    writer.WriteLine($"duration {str.Replace(',', '.')}");
                 }
             }
-            
-            using (StreamWriter writer = new StreamWriter(videoPath+"/metadata.txt"))
+
+            using (StreamWriter writer = new StreamWriter(Path.GetFullPath(videoPath+"/metadata.txt")))
             {
                 writer.WriteLine(";FFMETADATA1");
                 for (int i = 0; i < audioSlides.Count - 1; i++)
@@ -313,11 +314,11 @@ public class PageInstance
             }
 
             await FFMpegArguments
-                .FromFileInput(videoPath + "/imagelist.txt", false, options => options
+                .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
                     .WithCustomArgument("-f concat -safe 0 -r 1"))
-                .AddFileInput(videoPath + "/audio.mp3")
-                .AddFileInput(videoPath + "/metadata.txt")
-                .OutputToFile(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4", true, options => options
+                .AddFileInput(Path.GetFullPath(videoPath + "/audio.mp3"))
+                .AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"))
+                .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options => options
                     .WithVideoCodec("libx264")
                     .WithCustomArgument("-pix_fmt yuv420p")
                     .WithCustomArgument("-map 0:v:0 -map 1:a:0")
