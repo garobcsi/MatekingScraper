@@ -7,5 +7,7 @@ cp ./src/.env.example ./src/bin/Release/net8.0/linux-x64/publish/.env.example
 cd ./src/bin/Release/net8.0/win-x64/publish
 zip -r ../../../../../../MathScraper-windows.zip ./*
 
+cd ../../../../../..
+
 cd ./src/bin/Release/net8.0/linux-x64/publish
 tar -zcf ../../../../../../MathScraper-linux.tar.gz *
