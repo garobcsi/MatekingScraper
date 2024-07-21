@@ -9,12 +9,14 @@ public class AsyncJobQueue
     private bool _concurrencyLimitEnabled;
     private int _maxConcurrentJobs;
     private int _currentJobId;
+    private int _failedJobsCount;
 
     public AsyncJobQueue(bool concurrencyLimitEnabled = false, int maxConcurrentJobs = 10)
     {
         _concurrencyLimitEnabled = concurrencyLimitEnabled;
         _maxConcurrentJobs = maxConcurrentJobs;
         _currentJobId = 0;
+        _failedJobsCount = 0;
 
         if (_concurrencyLimitEnabled)
         {
@@ -58,6 +60,7 @@ public class AsyncJobQueue
         catch (Exception ex)
         {
             Console.WriteLine($"Job {jobId} failed: {ex.Message}");
+            Interlocked.Increment(ref _failedJobsCount);  // Increment the failed jobs counter
         }
         finally
         {
@@ -94,6 +97,8 @@ public class AsyncJobQueue
     }
 
     public int RunningJobsCount => _jobs.Count;
+
+    public int FailedJobsCount => _failedJobsCount;
 
     public bool ConcurrencyLimitEnabled
     {
