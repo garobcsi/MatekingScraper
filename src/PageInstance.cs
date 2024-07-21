@@ -254,6 +254,8 @@ public class PageInstance
                     return canvas.toDataURL('image/png');
                 })();");
             
+            await Page.EvaluateExpressionAsync("hangero = 0");
+            
             while (true) // wait for first slide to load
             {
                 await Page.EvaluateExpressionAsync($"Tekeres(1);");
