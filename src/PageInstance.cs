@@ -297,15 +297,32 @@ public class PageInstance
                     writer.WriteLine($"duration {audioSlides[i + 2] - audioSlides[i+1]}");
                 }
             }
+            
+            using (StreamWriter writer = new StreamWriter(videoPath+"/metadata.txt"))
+            {
+                writer.WriteLine(";FFMETADATA1");
+                for (int i = 0; i < audioSlides.Count - 1; i++)
+                {
+                    writer.WriteLine($"[CHAPTER]");
+                    writer.WriteLine($"TIMEBASE=1/1000");
+                    writer.WriteLine($"START={(int)(audioSlides[i] * 1000)}"); 
+                    writer.WriteLine($"END={(int)(audioSlides[i+1] * 1000)-1}"); 
+                    writer.WriteLine($"title=Chapter {i + 1}");
+                    writer.WriteLine();
+                }
+            }
 
             await FFMpegArguments
-                .FromFileInput(videoPath+"/imagelist.txt", false, options => options.WithCustomArgument("-f concat -safe 0 -r 1"))
-                .AddFileInput(videoPath+"/audio.mp3")
-                .OutputToFile(path+$"/{video.Number}-{CleanPath(video.Name)}.mp4", true, options => options
+                .FromFileInput(videoPath + "/imagelist.txt", false, options => options
+                    .WithCustomArgument("-f concat -safe 0 -r 1"))
+                .AddFileInput(videoPath + "/audio.mp3")
+                .AddFileInput(videoPath + "/metadata.txt")
+                .OutputToFile(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4", true, options => options
                     .WithVideoCodec("libx264")
                     .WithCustomArgument("-pix_fmt yuv420p")
                     .WithCustomArgument("-map 0:v:0 -map 1:a:0")
-                    .WithCustomArgument("-c:v copy -c:a aac"))
+                    .WithCustomArgument("-c:v copy -c:a aac")
+                    .WithCustomArgument("-map_metadata 2"))
                 .ProcessAsynchronously();
         }
         return 0; // scraped successfully
