@@ -236,7 +236,7 @@ public class PageInstance
                         using (Stream contentStream = await response.Content.ReadAsStreamAsync(),
                                fileStream = new FileStream(videoPath+"/audio.mp3", FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                         {
-                            await contentStream.CopyToAsync(fileStream);
+                            await contentStream.CopyToAsync(fileStream, cts);
                         }
                     }
                 }
