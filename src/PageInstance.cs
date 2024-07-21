@@ -27,7 +27,7 @@ public class PageInstance
     private string StringFormat(string? str) => Regex.Replace(str??"", @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' ');
     private string CleanPath(string? str)
     {
-        string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+        string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars()+"?");
         Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
         return r.Replace(str ?? "", "");
     }
@@ -313,18 +313,37 @@ public class PageInstance
                 }
             }
 
-            await FFMpegArguments
+            var ffmpegArgs = FFMpegArguments
                 .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
-                    .WithCustomArgument("-f concat -safe 0 -r 1"))
-                .AddFileInput(Path.GetFullPath(videoPath + "/audio.mp3"))
-                .AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"))
-                .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options => options
-                    .WithVideoCodec("libx264")
-                    .WithCustomArgument("-pix_fmt yuv420p")
-                    .WithCustomArgument("-map 0:v:0 -map 1:a:0")
-                    .WithCustomArgument("-c:v copy -c:a aac")
-                    .WithCustomArgument("-map_metadata 2"))
-                .ProcessAsynchronously();
+                    .WithCustomArgument("-f concat -safe 0 -r 1"));
+
+            string audioPath = Path.GetFullPath(videoPath + "/audio.mp3");
+            
+            if (File.Exists(audioPath))
+            {
+                ffmpegArgs = ffmpegArgs.AddFileInput(audioPath);
+            }
+            
+            var ffmpegProc = ffmpegArgs.AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"))
+                .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options =>
+                {
+                    options.WithVideoCodec("libx264")
+                        .WithCustomArgument("-pix_fmt yuv420p")
+                        .WithCustomArgument("-map 0:v:0");
+
+                    if (File.Exists(audioPath))
+                    {
+                        options.WithCustomArgument("-map 1:a:0")
+                            .WithCustomArgument("-c:v copy -c:a aac");
+                    }
+                    else
+                    {
+                        options.WithCustomArgument("-c:v copy");
+                    }
+
+                    options.WithCustomArgument("-map_metadata 2");
+                });
+            await ffmpegProc.ProcessAsynchronously();
         }
         return 0; // scraped successfully
     }
