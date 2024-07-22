@@ -219,10 +219,10 @@ public class PageInstance
         string videoPath = Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.metadata");
 
         DirectoryInfo folder = Directory.CreateDirectory(videoPath);
-
+        
         await Page.GoToAsync(video.Link);
         await Page.WaitForSelectorAsync("body > div.panel-display.panel-1col.clearfix > div > div > div.panel-pane.pane-page-content.limited-wide > div > div > div > div > div > div.panel-pane.pane-entity-view.pane-node > div > div > div > div > div.field.field-name-field-swiffy-entity.field-type-entityreference.field-label-hidden");
-
+        
         {//dowload audio
             string audioLink = await Page.EvaluateExpressionAsync<string>("hangforras");
             
@@ -232,7 +232,7 @@ public class PageInstance
                     using (HttpResponseMessage response = await httpClient.GetAsync(audioLink))
                     {
                         response.EnsureSuccessStatusCode();
-
+        
                         using (Stream contentStream = await response.Content.ReadAsStreamAsync(),
                                fileStream = new FileStream(Path.GetFullPath(videoPath+"/audio.mp3"), FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                         {
@@ -241,7 +241,7 @@ public class PageInstance
                     }
                 }
         }
-
+        
         List<uint> chapterSlides = await Page.EvaluateExpressionAsync<List<uint>>("BogyoKulcsDiak");
         List<double> audioSlides = await Page.EvaluateExpressionAsync<List<double>>("HangKulcsIdok");
 
@@ -251,7 +251,7 @@ public class PageInstance
             string lastPng = await Page.EvaluateExpressionAsync<string>(@"
                 (function() {
                     var canvas = document.querySelector('canvas');
-                    return canvas.toDataURL('image/png');
+                    return canvas.toDataURL('image/jpeg');
                 })();");
             
             await Page.EvaluateExpressionAsync("hangero = 0");
@@ -274,7 +274,7 @@ public class PageInstance
                     currentPng = await Page.EvaluateExpressionAsync<string>(@"
                         (function() {
                             var canvas = document.querySelector('canvas');
-                            return canvas.toDataURL('image/png');
+                            return canvas.toDataURL('image/jpeg');
                         })();");
                     if (currentSlide == i && lastPng != currentPng)
                     {
@@ -284,7 +284,7 @@ public class PageInstance
                 }
                 string base64 = currentPng.Split(',')[1];
                 var imageBytes = Convert.FromBase64String(base64);
-                await File.WriteAllBytesAsync(Path.GetFullPath(videoPath+$"/{i}.png"), imageBytes, cts);
+                await File.WriteAllBytesAsync(Path.GetFullPath(videoPath+$"/{i}.jpeg"), imageBytes, cts);
             }
         }
 
@@ -300,7 +300,7 @@ public class PageInstance
                 {
                     for (int i = 0; i < audioSlides.Count - 2; i++)
                     {
-                        writer.WriteLine($"file './{i + 1}.png'");
+                        writer.WriteLine($"file '{i + 1}.jpeg'");
                         string str = (audioSlides[i + 2] - audioSlides[i + 1]).ToString();
                         writer.WriteLine($"duration {str.Replace(',', '.')}");
                     }
@@ -309,10 +309,10 @@ public class PageInstance
                 {
                     for (int i = 0; i < slidesCount-1; i++)
                     {
-                        writer.WriteLine($"file './{i + 1}.png'");
+                        writer.WriteLine($"file '{i + 1}.jpeg'");
                         writer.WriteLine($"duration {muteAudioDuration}");
                     }
-                    writer.WriteLine($"file './{slidesCount-1}.png'");
+                    writer.WriteLine($"file '{slidesCount-1}.jpeg'");
                     writer.WriteLine($"duration {muteAudioDuration}");
                 }
             }
