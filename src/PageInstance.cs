@@ -349,8 +349,7 @@ public class PageInstance
 
             var ffmpegArgs = FFMpegArguments
                 .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
-                    .WithCustomArgument("-f concat -r 1"));
-            
+                    .WithCustomArgument("-f concat"));
             
             if (audioExists)
             {
@@ -363,9 +362,10 @@ public class PageInstance
                 {
                     options.WithVideoCodec("libx264")
                         .WithCustomArgument("-pix_fmt yuv420p")
-                        .WithCustomArgument("-map 0:v:0");
-            
-                    options.WithCustomArgument("-c:v copy");
+                        .WithCustomArgument("-map 0:v:0")
+                        .WithCustomArgument("-vsync cfr")
+                        .WithCustomArgument("-movflags +faststart");
+                    
                     if (audioExists)
                     {
                         options.WithCustomArgument("-map 1:a:0")
