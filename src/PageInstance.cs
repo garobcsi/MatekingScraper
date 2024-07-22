@@ -349,7 +349,7 @@ public class PageInstance
 
             var ffmpegArgs = FFMpegArguments
                 .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
-                    .WithCustomArgument("-f concat -safe 0 -r 1"));
+                    .WithCustomArgument("-f concat -r 1"));
             
             
             if (audioExists)
@@ -357,7 +357,8 @@ public class PageInstance
                 ffmpegArgs = ffmpegArgs.AddFileInput(audioPath);
             }
             
-            var ffmpegProc = ffmpegArgs.AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"))
+            var ffmpegProc = ffmpegArgs.AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"),false, options => options
+                    .WithCustomArgument("-f ffmetadata"))
                 .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options =>
                 {
                     options.WithVideoCodec("libx264")
@@ -368,10 +369,10 @@ public class PageInstance
                     if (audioExists)
                     {
                         options.WithCustomArgument("-map 1:a:0")
-                            .WithCustomArgument("-c:a aac");
+                            .WithCustomArgument("-c:a mp3");
                     }
             
-                    options.WithCustomArgument("-map_metadata "+ (audioExists ? "2" : "1"));
+                    options.WithCustomArgument("-map_metadata -"+ (audioExists ? "2" : "1"));
                 });
             await ffmpegProc.ProcessAsynchronously();
         }
