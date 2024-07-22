@@ -137,7 +137,25 @@ Subject? selectedSubject = null;
 { //scrape videos
     PrintColor.WriteLine("info: Video scraping started",ConsoleColor.Green);
     
-    AsyncJobQueue jobQueue = new AsyncJobQueue(true, 5);
+    AsyncJobQueue jobQueue = new AsyncJobQueue(new Func<bool>(() =>
+    {
+        var env = DotEnv.Read();
+        if (!env.ContainsKey("enableJobQueue")) return true;
+        if (bool.TryParse(env["enableJobQueue"], out bool result))
+        {
+            return result;
+        }
+        return true;
+    })(), new Func<int>(() =>
+    {
+        var env = DotEnv.Read();
+        if (!env.ContainsKey("maxJobQueueCount")) return 2;
+        if (int.TryParse(env["maxJobQueueCount"], out int result))
+        {
+            return result;
+        }
+        return 2;
+    })());
     
     foreach (var s in selectedSubject.SubSubjects)
     {
