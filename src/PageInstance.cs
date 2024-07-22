@@ -312,8 +312,6 @@ public class PageInstance
                         writer.WriteLine($"file '{i + 1}.jpeg'");
                         writer.WriteLine($"duration {muteAudioDuration}");
                     }
-                    writer.WriteLine($"file '{slidesCount-1}.jpeg'");
-                    writer.WriteLine($"duration {muteAudioDuration}");
                 }
             }
             
@@ -372,7 +370,7 @@ public class PageInstance
                             .WithCustomArgument("-c:a mp3");
                     }
             
-                    options.WithCustomArgument("-map_metadata -"+ (audioExists ? "2" : "1"));
+                    options.WithCustomArgument("-map_metadata "+ (audioExists ? "2" : "1"));
                 });
             await ffmpegProc.ProcessAsynchronously();
         }
