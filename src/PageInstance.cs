@@ -218,6 +218,8 @@ public class PageInstance
         string path = Path.GetFullPath($"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}");
         string videoPath = Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.metadata");
 
+        if (File.Exists(videoPath + "/done.txt")) return 0;
+
         DirectoryInfo folder = Directory.CreateDirectory(videoPath);
         
         await Page.GoToAsync(video.Link);
@@ -373,7 +375,13 @@ public class PageInstance
                     options.WithCustomArgument("-map_metadata "+ (audioExists ? "2" : "1"));
                 });
             await ffmpegProc.ProcessAsynchronously();
+            
         }
+
+        {//create done file
+            StreamWriter writer = new StreamWriter(Path.GetFullPath(videoPath + "/done.txt"));
+        }
+        
         return 0; // scraped successfully
     }
 }
