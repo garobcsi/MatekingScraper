@@ -266,10 +266,10 @@ public class PageInstance
                 }
         }
         
-        List<uint> chapterSlides = await Page.EvaluateExpressionAsync<List<uint>>("BogyoKulcsDiak");
+        List<uint?> chapterSlides = await Page.EvaluateExpressionAsync<List<uint?>>("BogyoKulcsDiak");
         List<double> audioSlides = await Page.EvaluateExpressionAsync<List<double>>("HangKulcsIdok");
 
-        uint slidesCount = chapterSlides.Last();
+        uint slidesCount = (uint)chapterSlides.Last();
         
         {//download pngs
             string lastPng = await Page.EvaluateExpressionAsync<string>(@"
