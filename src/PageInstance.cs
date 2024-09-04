@@ -1,7 +1,9 @@
 using System.Text.RegularExpressions;
+using dotenv.net;
 using MathScraper.Model;
 using PuppeteerSharp;
 using FFMpegCore;
+using FFMpegCore.Enums;
 
 namespace MathScraper;
 
@@ -23,6 +25,24 @@ public class PageInstance
         });
         return pai;
     }
+    
+    private static readonly string VideoCodec = new Func<string>(() =>
+    {
+        var env = DotEnv.Read();
+        if (!env.ContainsKey("videoCodec")) return "libx264";
+        return env["videoCodec"];
+    })();
+    
+    private static readonly bool GpuAcceleration = new Func<bool>(() =>
+    {
+        var env = DotEnv.Read();
+        if (!env.ContainsKey("gpuAcceleration")) return false;
+        if (bool.TryParse(env["gpuAcceleration"], out bool result))
+        {
+            return result;
+        }
+        return false;
+    })();
 
     private string StringFormat(string? str) => Regex.Replace(str??"", @"\t|\n|\r|JSHandle:", "").TrimEnd(' ').TrimStart(' ');
     private string CleanPath(string? str)
@@ -211,12 +231,14 @@ public class PageInstance
         return videos;
     }
 
-    public async Task<int> ScrapeVideo(Subject subject,SubSubject subSubject,Video video,CancellationToken cts)
+    public async Task<int> ScrapeVideo(int jobId,Subject subject,SubSubject subSubject,Video video,CancellationToken cts)
     {
         if (!video.Accessible) return 1; // video is not scrapeable
 
         string path = Path.GetFullPath($"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}");
         string videoPath = Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.metadata");
+        
+        Console.WriteLine($"info: Job {jobId} folder: {videoPath}");
 
         if (File.Exists(videoPath + "/done.txt")) return 0;
 
@@ -348,19 +370,37 @@ public class PageInstance
             }
 
             var ffmpegArgs = FFMpegArguments
-                .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options => options
-                    .WithCustomArgument("-f concat"));
+                .FromFileInput(Path.GetFullPath(videoPath + "/imagelist.txt"), false, options =>
+                {
+                    options.WithCustomArgument("-f concat");
+                    if (GpuAcceleration)
+                    {
+                        options.WithHardwareAcceleration(HardwareAccelerationDevice.Auto);
+                    }
+                });
             
             if (audioExists)
             {
-                ffmpegArgs = ffmpegArgs.AddFileInput(audioPath);
+                ffmpegArgs = ffmpegArgs.AddFileInput(audioPath,false, options =>
+                {
+                    if (GpuAcceleration)
+                    {
+                        options.WithHardwareAcceleration(HardwareAccelerationDevice.Auto);
+                    }
+                });
             }
-            
-            var ffmpegProc = ffmpegArgs.AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"),false, options => options
-                    .WithCustomArgument("-f ffmetadata"))
+
+            var ffmpegProc = ffmpegArgs.AddFileInput(Path.GetFullPath(videoPath + "/metadata.txt"),false, options =>
+                {
+                    options.WithCustomArgument("-f ffmetadata");
+                    if (GpuAcceleration)
+                    {
+                        options.WithHardwareAcceleration(HardwareAccelerationDevice.Auto);
+                    }
+                })
                 .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options =>
                 {
-                    options.WithVideoCodec("libx264")
+                    options.WithVideoCodec(VideoCodec)
                         .WithCustomArgument("-pix_fmt yuv420p")
                         .WithCustomArgument("-map 0:v:0")
                         .WithCustomArgument("-vsync cfr")
