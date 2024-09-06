@@ -96,7 +96,7 @@ public class AsyncJobQueue
         await Task.WhenAll(_jobs.Values.Select(j => j.task));
     }
 
-    public int RunningJobsCount => _jobs.Count;
+    public int AddedJobsCount => _jobs.Count;
 
     public int FailedJobsCount => _failedJobsCount;
 

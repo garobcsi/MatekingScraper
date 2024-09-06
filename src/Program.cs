@@ -176,12 +176,15 @@ Subject? selectedSubject = null;
             }
     }
 
-    PrintColor.WriteLine($"info: {jobQueue.RunningJobsCount} jobs started",ConsoleColor.Green);
+    PrintColor.WriteLine($"info: {jobQueue.AddedJobsCount} jobs started",ConsoleColor.Green);
     
     await jobQueue.WaitForAllJobsAsync();
-    if (jobQueue.FailedJobsCount == 0) PrintColor.WriteLine("info: Videos scraped successfully",ConsoleColor.Green);
-    else PrintColor.WriteLine("error: Videos scraped unsuccessfully", ConsoleColor.Red);
+    if (jobQueue.FailedJobsCount == 0) PrintColor.WriteLine("info: Videos scraped successfully\n",ConsoleColor.Green);
+    else PrintColor.WriteLine("error: Videos scraped unsuccessfully\n", ConsoleColor.Red);
 }
 
 await pai.Page.CloseAsync();
 await bwi.Browser.CloseAsync();
+
+Console.WriteLine("\nPress any key to exit...");
+Console.ReadKey();
