@@ -412,7 +412,7 @@ public class PageInstance
                         options.WithHardwareAcceleration(HardwareAccelerationDevice.Auto);
                     }
                 })
-                .OutputToFile(Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.mp4"), true, options =>
+                .OutputToFile(Path.GetFullPath(path + $"/{video.Number.ToString().PadLeft(videoNumberLenght,'0')}-{CleanPath(video.Name)}.mp4"), true, options =>
                 {
                     options.WithVideoCodec(VideoCodec)
                         .WithCustomArgument("-pix_fmt yuv420p")
