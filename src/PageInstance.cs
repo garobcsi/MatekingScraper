@@ -245,12 +245,12 @@ public class PageInstance
         return videos;
     }
 
-    public async Task<int> ScrapeVideo(int jobId,Subject subject,SubSubject subSubject,Video video,CancellationToken cts)
+    public async Task<int> ScrapeVideo(int jobId,int subjectNumberLenght,int videoNumberLenght,Subject subject,SubSubject subSubject,Video video,CancellationToken cts)
     {
         if (!video.Accessible) return 1; // video is not scrapeable
 
-        string path = Path.GetFullPath($"./data/{CleanPath(subject.Name)}/{(subSubject.Number)}-{CleanPath(subSubject.Name)}");
-        string videoPath = Path.GetFullPath(path + $"/{video.Number}-{CleanPath(video.Name)}.metadata");
+        string path = Path.GetFullPath($"./data/{CleanPath(subject.Name)}/{subSubject.Number.ToString().PadLeft(subjectNumberLenght,'0')}-{CleanPath(subSubject.Name)}");
+        string videoPath = Path.GetFullPath(path + $"/{video.Number.ToString().PadLeft(videoNumberLenght,'0')}-{CleanPath(video.Name)}.metadata");
         
         Console.WriteLine($"info: Job {jobId} folder: {videoPath}");
 
