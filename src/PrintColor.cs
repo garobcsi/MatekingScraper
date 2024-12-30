@@ -1,4 +1,4 @@
-namespace MathScraper;
+namespace MatekingScraper;
 
 public class PrintColor
 {

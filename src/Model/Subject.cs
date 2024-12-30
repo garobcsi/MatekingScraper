@@ -1,4 +1,4 @@
-namespace MathScraper.Model;
+namespace MatekingScraper.Model;
 
 public class Subject
 {

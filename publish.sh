@@ -9,9 +9,9 @@ unzip -p ffmpeg.zip ffmpeg-master-latest-win64-gpl/bin/ffprobe.exe > ./src/bin/R
 cp ./src/.env.example ./src/bin/Release/net8.0/linux-x64/publish/.env
 
 cd ./src/bin/Release/net8.0/win-x64/publish
-zip -r ../../../../../../MathScraper-windows.zip ./* .env
+zip -r ../../../../../../MatekingScraper-windows.zip ./* .env
 
 cd ../../../../../..
 
 cd ./src/bin/Release/net8.0/linux-x64/publish
-tar -zcf ../../../../../../MathScraper-linux.tar.gz * .env
+tar -zcf ../../../../../../MatekingScraper-linux.tar.gz * .env

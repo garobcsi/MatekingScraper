@@ -1,6 +1,6 @@
 using dotenv.net;
-using MathScraper;
-using MathScraper.Model;
+using MatekingScraper;
+using MatekingScraper.Model;
 
 BrowserInstance bwi = await BrowserInstance.Init();
 if (bwi.Browser.IsConnected) PrintColor.WriteLine("info: browser instance started successfully",ConsoleColor.Green);

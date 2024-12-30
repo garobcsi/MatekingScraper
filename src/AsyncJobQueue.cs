@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace MathScraper;
+namespace MatekingScraper;
 
 public class AsyncJobQueue
 {

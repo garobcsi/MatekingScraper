@@ -1,11 +1,11 @@
 using System.Text.RegularExpressions;
 using dotenv.net;
-using MathScraper.Model;
+using MatekingScraper.Model;
 using PuppeteerSharp;
 using FFMpegCore;
 using FFMpegCore.Enums;
 
-namespace MathScraper;
+namespace MatekingScraper;
 
 public class PageInstance
 {

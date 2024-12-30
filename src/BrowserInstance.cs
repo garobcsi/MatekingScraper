@@ -1,7 +1,7 @@
 using dotenv.net;
 using PuppeteerSharp;
 
-namespace MathScraper;
+namespace MatekingScraper;
 
 public class BrowserInstance
 {
